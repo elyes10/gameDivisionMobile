@@ -5,14 +5,18 @@
  */
 package services;
 
+import com.codename1.components.ImageViewer;
+import com.codename1.components.StorageImage;
 import com.codename1.io.CharArrayReader;
 import com.codename1.io.ConnectionRequest;
 import com.codename1.io.JSONParser;
 import com.codename1.io.NetworkEvent;
 import com.codename1.io.NetworkManager;
+import com.codename1.messaging.Message;
 import com.codename1.payment.Product;
 import com.codename1.ui.Button;
 import com.codename1.ui.Container;
+import com.codename1.ui.Display;
 import com.codename1.ui.EncodedImage;
 import com.codename1.ui.Form;
 import com.codename1.ui.Image;
@@ -21,10 +25,11 @@ import com.codename1.ui.URLImage;
 import com.codename1.ui.events.ActionListener;
 import com.codename1.ui.layouts.BoxLayout;
 import entities.cart;
-import gui.orders;
+import gui.ordersgui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import gui.Cart;
 import utils.Statics;
 
 /**
@@ -33,8 +38,10 @@ import utils.Statics;
  */
 public class CartServices {
         //var
+   public static String listeproduit="";
     boolean resultOK;
     ConnectionRequest req;
+      ConnectionRequest req1,req3,req4,req5;
     static CartServices instance;
     ArrayList<cart> carts = new ArrayList<>();
      ArrayList<cart> allcarts=new ArrayList<>();
@@ -42,6 +49,10 @@ public class CartServices {
     //constructor
     private CartServices() {
         req = new ConnectionRequest();
+        req1 = new ConnectionRequest();
+          req3 = new ConnectionRequest();
+             req4 = new ConnectionRequest();
+             req5 = new ConnectionRequest();
     }
     
     //SINGLETON
@@ -53,6 +64,8 @@ public class CartServices {
         
         return instance;
     }
+  
+  
     
 public ArrayList<cart> parseJSONAction(String textJson){
         
@@ -74,7 +87,8 @@ public ArrayList<cart> parseJSONAction(String textJson){
                 t.setCart_id((int)cid);
                 float userid = Float.parseFloat(obj.get("userId").toString());
                 t.setUser_id((int) userid);
-                
+                int idd=(int)id;
+               
                 carts.add(t);
 
             }
@@ -101,25 +115,26 @@ public ArrayList<cart> parseJSONAction(String textJson){
                  Container labelTitles = new Container(BoxLayout.x());
                    Label nametitle = new Label("Product");
                    
-        Label quantitetitle = new Label("Quantite");
-           Label imagetitle = new Label("Image");
-           Label Pricetitle = new Label("Price");
-            labelTitles.addAll(nametitle,quantitetitle,imagetitle,Pricetitle);
+        Label quantitetitle = new Label("    Quantite");
+          // Label imagetitle = new Label("Image");
+           Label Pricetitle = new Label("           Price");
+            labelTitles.addAll(nametitle,quantitetitle,Pricetitle);
             hi.add(labelTitles);
-                for (cart p : carts) 
+                         
+                  for (cart p : carts) 
                 {   
                     
                    
-                     
-                 
+                     p.setProduct_name(prodname(p.getProductid()));
+                 listeproduit=listeproduit+","+prodname(p.getProductid());
+                     hi.add(addItemcontainer(p));  
                     
-                    
-                    hi.add(addItemcontainer(p));  
                  
-                }             req.removeResponseListener(this);
+                 
+                } req.removeResponseListener(this);
             }
         });
-        
+         
         System.out.println("carts=>"+carts);
         NetworkManager.getInstance().addToQueueAndWait(req);
         return hi;
@@ -134,19 +149,24 @@ public ArrayList<cart> parseJSONAction(String textJson){
        
         Container labelsCtn = new Container(BoxLayout.x());
         
-        String idpr = Integer.toString(p.getCart_id());
+        String idpr =p.getProduct_name();
+        
         Label name = new Label(idpr);
-        Label Categ = new Label("            "+Integer.toString(p.getQuantity()));
-      
+        Label Categ = new Label("   "+Integer.toString(p.getQuantity()));
+     Label price = new Label("      "+prodprice(p.getProductid()));
+    //image test
+     
+
+    //end image
         //Button mailBtn = new Button(p.getMail());
-         Button quantbutButtonplus=new Button("+");
-                    Button quantButtonmoin=new Button("-");
-        Button removeprod=new Button("Del");
-        quantbutButtonplus.addActionListener(e -> {quantiteplus(p.getCart_id());p.setQuantity(p.getQuantity()+1);Categ.setText("            "+Integer.toString(p.getQuantity()));});
-        quantButtonmoin.addActionListener(e -> {quantitemoin(p.getCart_id());p.setQuantity(p.getQuantity()-1);Categ.setText("            "+Integer.toString(p.getQuantity()));});
-        removeprod.addActionListener(e -> deleteItem(p.getCart_id()));
-        labelsCtn.addAll(name,Categ,quantbutButtonplus,quantButtonmoin,removeprod);
-       
+         Button quantbutButtonplus=new Button(" +");
+                    Button quantButtonmoin=new Button(" -");
+        Button removeprod=new Button("    Del");
+        quantbutButtonplus.addActionListener(e -> {quantiteplus(p.getCart_id());p.setQuantity(p.getQuantity()+1);Categ.setText("   "+Integer.toString(p.getQuantity()));});
+        quantButtonmoin.addActionListener(e -> {quantitemoin(p.getCart_id());p.setQuantity(p.getQuantity()-1);Categ.setText   ("   "+Integer.toString(p.getQuantity()));  });
+        removeprod.addActionListener(e -> {deleteItem(p.getCart_id());});
+        labelsCtn.addAll(name,Categ,quantbutButtonplus,quantButtonmoin,price,removeprod);
+    
         
         cell.add(labelsCtn);
        
@@ -202,6 +222,92 @@ public ArrayList<cart> parseJSONAction(String textJson){
         resultOK=true;
         return resultOK;
     }
-          
+       
          
+         
+         static String n="jj";
+    
+        
+        
+        public String prodname(int id){
+       String name="";
+       
+       String url = Statics.BASE_URL+"/prodname/"+id;
+        req1.setUrl(url);
+        req1.setPost(false);
+        Form hi = new Form("Cart", BoxLayout.y());
+        req1.addResponseListener(new ActionListener<NetworkEvent>() {
+            @Override
+            public void actionPerformed(NetworkEvent evt) {
+                String response = new String(req1.getResponseData());
+                
+              n= response;
+               req1.removeResponseListener(this);
+            }
+        });
+         NetworkManager.getInstance().addToQueueAndWait(req1);
+       return n;
+       }  
+        
+        public String prodprice(int id){
+       String name="";
+       
+       String url = Statics.BASE_URL+"/prodprice/"+id;
+        req3.setUrl(url);
+        req3.setPost(false);
+        Form hi = new Form("Cart", BoxLayout.y());
+        req3.addResponseListener(new ActionListener<NetworkEvent>() {
+            @Override
+            public void actionPerformed(NetworkEvent evt) {
+                String response = new String(req3.getResponseData());
+               
+              n= response;
+               req3.removeResponseListener(this);
+            }
+        });
+         NetworkManager.getInstance().addToQueueAndWait(req3);
+       return n;
+       } 
+        
+        public String prodimg(int id){
+       String name="";
+       
+       String url = Statics.BASE_URL+"/prodimage/"+id;
+        req3.setUrl(url);
+        req3.setPost(false);
+        Form hi = new Form("Cart", BoxLayout.y());
+        req3.addResponseListener(new ActionListener<NetworkEvent>() {
+            @Override
+            public void actionPerformed(NetworkEvent evt) {
+                String response = new String(req3.getResponseData());
+           
+              n= response;
+               req3.removeResponseListener(this);
+            }
+        });
+         NetworkManager.getInstance().addToQueueAndWait(req3);
+       return n;
+       } 
+        
+        public void add2cart(int id){
+        String url = Statics.BASE_URL+"/addcartjson/"+id;
+        req4.setUrl(url);
+        req4.setPost(false);
+        NetworkManager.getInstance().addToQueueAndWait(req4);
+        }
+         public void addorder(String list){
+        String url = Statics.BASE_URL+"/addordersjson/"+(listeproduit.toString());
+        req5.setUrl(url);
+        req5.setPost(false);
+        NetworkManager.getInstance().addToQueueAndWait(req5);
+        
+        }
+         
+         public void mail(){
+         
+         Message m = new Message("order confirmed");
+m.getAttachments().put("product lists", listeproduit) ;
+
+Display.getInstance().sendMessage(new String[] {"elyes.zarrad@esprit.com"}, "orders confirmation", m);
+         }
 }

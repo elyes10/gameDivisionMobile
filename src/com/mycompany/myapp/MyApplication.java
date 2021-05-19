@@ -14,6 +14,9 @@ import java.io.IOException;
 import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.io.NetworkEvent;
 import gui.Cart;
+import gui.ListForm;
+import gui.ordersgui;
+import services.CartServices;
 
 
 /**
@@ -49,8 +52,11 @@ public class MyApplication {
     }
     
     public void start() {
-       new Cart().show();
+      // new ordersgui().show();
+      new Cart().show();
       
+     // new ListForm().show();
+       // CartServices.getInstance().add2cart(5);
     }
 
     public void stop() {

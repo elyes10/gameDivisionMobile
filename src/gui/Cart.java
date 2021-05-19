@@ -26,15 +26,19 @@ public class Cart extends Form{
         //widgets
         SpanLabel sp=new SpanLabel();
          Button ordersbtn = new Button("Orders History");
+          Button orderconfirm= new Button("confirm order");
          //ArrayList m=CartServices.getInstance().getcarts();
       // sp.setText(m.toString());
-          ordersbtn.addActionListener(e -> new orders().show());
+          ordersbtn.addActionListener(e -> new ordersgui().show());
+            orderconfirm.addActionListener(e -> {CartServices.getInstance().addorder(CartServices.getInstance().listeproduit);CartServices.getInstance().mail();});
         //add to form
        Form f =CartServices.getInstance().getAllcarts();
           //  this.add(sp);
           this.add(ordersbtn);
           this.add(f);
-        
+           this.add(orderconfirm);
+        //System.out.println("testt"+CartServices.getInstance().prodname(5));
+        //String prodname=CartServices.getInstance().prodname(5);
     }
     
 }

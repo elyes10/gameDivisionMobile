@@ -10,7 +10,7 @@ package entities;
  * @author HP OMEN
  */
 public class cart {
-
+private String product_name;
     private int cart_id;
     private int productid;
     private int quantity;
@@ -89,5 +89,19 @@ public class cart {
      */
     public void setProductid(int productid) {
         this.productid = productid;
+    }
+
+    /**
+     * @return the product_name
+     */
+    public String getProduct_name() {
+        return product_name;
+    }
+
+    /**
+     * @param product_name the product_name to set
+     */
+    public void setProduct_name(String product_name) {
+        this.product_name = product_name;
     }
 }
